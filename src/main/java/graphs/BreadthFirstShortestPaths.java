@@ -1,7 +1,7 @@
 package graphs;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Struct;
+import java.util.*;
 
 /**
  * Consider this class, BreadthFirstShortestPaths, which computes the shortest path between
@@ -52,6 +52,27 @@ public class BreadthFirstShortestPaths {
     // Breadth-first search from multiple sources
     private void bfs(Graph G, Iterable<Integer> sources) {
         // TODO
+        for (int s : sources) {
+            // BFS init
+            Queue<Integer> q = new LinkedList<>();
+            q.add(s);
+            distTo[s] = 0;
+            marked[s] = true;
+            // loop on queue
+            while (!q.isEmpty()) {
+                int current = q.poll();
+                // for each neighbour
+                for (int neighbour : G.adj(current)) {
+                    if (distTo[neighbour] > distTo[current] + 1) {
+                        q.add(neighbour);
+                        distTo[neighbour] = distTo[current] + 1;
+                        marked[neighbour] = true;
+                    }
+                }
+            }
+            System.out.println("shortest paths from source "+s+" :");
+            System.out.println(Arrays.toString(distTo));
+        }
     }
 
     /**
@@ -62,7 +83,7 @@ public class BreadthFirstShortestPaths {
      */
     public boolean hasPathTo(int v) {
         // TODO
-         return false;
+        return marked[v];
     }
 
     /**
@@ -74,7 +95,7 @@ public class BreadthFirstShortestPaths {
      */
     public int distTo(int v) {
         // TODO
-         return -1;
+        return distTo[v];
     }
 
     static class Graph {
