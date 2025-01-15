@@ -1,6 +1,6 @@
 package graphs;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * Sophie and Marc want to reduce the bubbles
@@ -19,7 +19,7 @@ import java.util.List;
  * You are then in his bubble, and he is in yours.
  *
  * Let's say the following contacts have taken place: [
- * [Alice, Bob], [Alice, Carol], [Carol, Alice], [Eve, Alice], [Alice, Frank],
+ * [Alice, Bob], [Alice, Carole], [Carole, Alice], [Eve, Alice], [Alice, Frank],
  * [Bob, Carole], [Bob, Eve], [Bob, Frank], [Bob, Carole], [Eve, Frank]
  * ].
  *
@@ -30,9 +30,9 @@ import java.util.List;
  * The resulting bubbles are :
  *
  * - Alice's bubble = [Bob, Carol, Eve, Frank]
- * - Bob's bubble = [Bob, Carol, Eve, Frank]
  * - Bob's bubble = [Alice, Carol, Eve, Frank]
  * - Carole's bubble = [Alice, Bob]
+ * - Eve's bubble = [Alice, Bob, Frank]
  * - Frank's Bubble = [Alice, Bob, Eve]
  *
  * Note that the relationship is symmetric
@@ -87,9 +87,44 @@ public class Bubbles {
      */
     public static List<ForbiddenRelation> cleanBubbles(List<Contact> contacts, int n) {
         // TODO
-         return null;
+        // create bubbles from given contacts
+        HashMap<String, HashSet<String>> bubbleList = new HashMap<>();
+        for (Contact contact : contacts) {
+            if (!bubbleList.containsKey(contact.a)) {
+                bubbleList.put(contact.a, new HashSet<>());
+            }
+            if (!bubbleList.containsKey(contact.b)) {
+                bubbleList.put(contact.b, new HashSet<>());
+            }
+            bubbleList.get(contact.a).add(contact.b);
+            bubbleList.get(contact.b).add(contact.a);
+        }
+//        System.out.println(bubbleList.entrySet());
+        // return value
+        List<ForbiddenRelation> ret = new ArrayList<>();
+        // for each connection => prune mutual connections if both have too many contacts
+        for (Contact contact : contacts) {
+            // skip the check if we just removed the element from bubbleList anyway
+            if (!bubbleList.get(contact.a).contains(contact.b)) continue;
+            if (bubbleList.get(contact.a).size() > n && bubbleList.get(contact.b).size() > n) {
+                ret.add(new ForbiddenRelation(contact.a, contact.b));
+                bubbleList.get(contact.a).remove(contact.b);
+                bubbleList.get(contact.b).remove(contact.a);
+            }
+        }
+        // for each connection => prune mutual connections if at least one still has too many contacts
+        for (Contact contact : contacts) {
+            // skip the check if we just removed the element from bubbleList anyway
+            if (!bubbleList.get(contact.a).contains(contact.b)) continue;
+            if (bubbleList.get(contact.a).size() > n || bubbleList.get(contact.b).size() > n) {
+                ret.add(new ForbiddenRelation(contact.a, contact.b));
+                bubbleList.get(contact.a).remove(contact.b);
+                bubbleList.get(contact.b).remove(contact.a);
+            }
+        }
+//        for (ForbiddenRelation f : ret) {System.out.println(f.a+"-"+f.b);}
+        return ret;
     }
-
 }
 
 
