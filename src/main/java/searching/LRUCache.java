@@ -1,5 +1,8 @@
 package searching;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+
 /**
  * We are interested in the implementation of an LRU cache,
  * i.e. a (hash)-map of limited capacity where the addition of
@@ -56,17 +59,55 @@ package searching;
 public class LRUCache<K,V> {
 
     private int capacity;
-
+    // doubly linked list to store the elements from the least recently used (head) to the most recently used (tail)
+    LinkedList<K> list;
+    HashMap<K,V> map;
 
     public LRUCache(int capacity) {
         this.capacity = capacity;
+        this.list = new LinkedList<>();
+        this.map = new HashMap<>();
     }
 
+    /**
+     * get(key) returns the entry with the given key from the cache,
+     * this element becomes the most recently used element
+     * @param key
+     * @return
+     */
     public V get(K key) {
-         return null;
+        System.out.println(map.entrySet()+" || "+list+" || get("+key+")");
+        // TODO
+        // get value in cache
+        V ret = map.get(key);
+        // value becomes MRU + update LRU
+        if (list.contains(key)) {
+            list.remove(key);
+            list.add(key);
+        }
+        return ret;
     }
 
+    /**
+     * put(key, elem) inserts the given element in the cache,
+     * this element becomes the most recently used element
+     * and if needed (the cache is full and the key not yet present),
+     * the least recently used element is removed.
+     * @param key
+     * @param value
+     */
     public void put(K key, V value) {
+        System.out.println(map.entrySet()+" || "+list+" || put("+key+", "+value+")");
+        // TODO
+        // check if it was already in cache => if so remove old
+        list.remove(key);
+        // check if max capacity reached => remove LRU
+        if (list.size() == capacity) {
+            K old = list.removeFirst();
+            map.remove(old);
+        }
+        // not in cache => add to cache + map
+        list.add(key); map.put(key, value);
     }
 
 }

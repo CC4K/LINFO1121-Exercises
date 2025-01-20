@@ -47,13 +47,71 @@ public class SmallestPrice {
      *         or -1 if there is no path within the maxTime.
      */
     public static int getSmallestPrice(WeightedGraph graph, int source, int maxTime, List<Pair> destinations) {
+        // simplify inputs
+        List<List<Integer>> jolie_graphe = new ArrayList<>();
+        for (List<DirectedEdge> l : graph.adj) {
+            for (DirectedEdge e : l) {
+                List<Integer> edge = new ArrayList<>();
+                edge.add(e.v);
+                edge.add(e.w);
+                edge.add(e.weight);
+                jolie_graphe.add(edge);
+            }
+        }
+        Map<Integer, Integer> prices = new HashMap<>();
+        for (Pair p : destinations) {
+            prices.put(p.node, p.price);
+        }
+        // prints
+//        System.out.println("source = "+source+" | maxTime = "+maxTime);
+//        System.out.print("graph[][] = [");
+//        for (List<Integer> x : jolie_graphe) {
+//            System.out.print(x);
+//        }
+//        System.out.println("]");
+//        System.out.println("prices = "+prices.entrySet());
+        // ============================================================================= //
         // TODO
-         return -1;
-
+        // Dijkstra => need a dist array of INF + PQ sorted on weight/distance cost
+        int INF = Integer.MAX_VALUE;
+        int[] dist = new int[graph.V];
+        Arrays.fill(dist, INF);
+        PriorityQueue<Node> q = new PriorityQueue<>((n1, n2) -> n1.weight - n2.weight);
+        // init with source
+        dist[source] = 0;
+        q.add(new Node(source, 0));
+        int smallestPrice = INF;
+        // start Dijkstra
+        while (!q.isEmpty()) {
+            Node current = q.poll();
+            // limit reached => stop
+            if (current.weight > maxTime) continue;
+            // we are standing on a point of interest, go buy it and remove from "shopping list"
+            if (prices.containsKey(current.node)) {
+                smallestPrice = Math.min(smallestPrice, prices.get(current.node));
+            }
+            // there is nothing here, check every neighbour
+            for (DirectedEdge edge : graph.outEdges(current.node)) {
+                int dest = edge.to();
+                int distToDest = current.weight + edge.weight();
+                // if distance to destination < current distance + doesn't break maxTime
+                if (distToDest < dist[dest] && distToDest <= maxTime) {
+                    dist[dest] = distToDest; // update distance
+                    q.add(new Node(dest, distToDest));
+                }
+            }
+        }
+        return (smallestPrice == INF) ? -1 : smallestPrice;
     }
 
-
-
+    static class Node {
+        public int node;
+        public int weight;
+        public Node(int node, int weight) {
+            this.node = node;
+            this.weight = weight;
+        }
+    }
 
     static class Pair {
         private final int node;
@@ -71,17 +129,13 @@ public class SmallestPrice {
         public int getPrice() {
             return price;
         }
-
     }
-
 
     static class WeightedGraph {
 
         private final int V;                // number of nodes in this digraph
         private int E;                      // number of edges in this digraph
         private List<DirectedEdge>[] adj;    // adj[v] = adjacency list for node v
-
-
 
         public WeightedGraph(int V) {
             this.V = V;
@@ -100,7 +154,6 @@ public class SmallestPrice {
             return E;
         }
 
-
         public void addEdge(DirectedEdge e) {
             int v = e.from();
             int w = e.to();
@@ -116,8 +169,6 @@ public class SmallestPrice {
         public Iterable<DirectedEdge> outEdges(int from) {
             return adj[from];
         }
-
-
     }
 
     static class DirectedEdge {
@@ -168,8 +219,6 @@ public class SmallestPrice {
         public int weight() {
             return weight;
         }
-
-
     }
 
 }

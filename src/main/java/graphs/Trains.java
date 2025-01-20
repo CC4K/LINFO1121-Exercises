@@ -71,7 +71,29 @@ public class Trains {
      *         The map must contain the starting station
      */
     public static Map<String, Integer> reachableEarliest(HashMap<StationTime, LinkedList<StationTime>> relations, StationTime startPoint) {
-         return null; 
+        Map<String, Integer> ret = new HashMap<>();
+        PriorityQueue<StationTime> q = new PriorityQueue<>((st1, st2) -> st1.time - st2.time);
+        // add initial stations
+        for (StationTime key : relations.keySet()) q.add(key);
+        ret.put(startPoint.station, startPoint.time);
+        // start Djkstra
+        while (!q.isEmpty()) {
+            StationTime current = q.poll();
+            if (ret.containsKey(current.station) && current.time >= ret.get(current.station)) {
+                // search neighbours
+                for (StationTime neighbour : relations.get(current)) {
+                    if (ret.containsKey(neighbour.station)) {
+                        if (neighbour.time < ret.get(neighbour.station)) {
+                            ret.put(neighbour.station, neighbour.time);
+                        }
+                    }
+                    else {
+                        ret.put(neighbour.station, neighbour.time);
+                    }
+                }
+            }
+        }
+        return ret;
     }
 
     public static class StationTime implements Comparable<StationTime> {

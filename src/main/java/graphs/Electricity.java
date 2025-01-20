@@ -29,7 +29,49 @@ public class Electricity {
      */
     public static int minimumSpanningCost(int n, int [][] edges) {
         //TODO
-         return -1;
+        HashMap<Integer,List<CostNode>> map = new HashMap<>();
+        for(int i = 0 ; i < n ; i++){
+            map.put(i , new ArrayList<>());
+        }
+        for (int[] edge : edges) {
+            int from = edge[0];
+            int to = edge[1];
+            int cost = edge[2];
+            map.get(from).add(new CostNode(from, to, cost));
+            map.get(to).add(new CostNode(to, from, cost));
+        }
+
+        HashSet<Integer> visited = new HashSet<>();
+        PriorityQueue<CostNode> pq = new PriorityQueue<>((n1, n2) -> n1.cost - n2.cost);
+        pq.add(new CostNode(-1,0,0));
+        int MST = 0;
+        while(!pq.isEmpty()){
+            CostNode current = pq.poll();
+            if (visited.contains(current.nodeEnd)) continue;
+            visited.add(current.nodeEnd);
+            MST += current.cost;
+            if(visited.size() == n){
+                return MST;
+            }
+            for (CostNode neighbor : map.get(current.nodeEnd)) {
+                if (!visited.contains(neighbor.nodeEnd)) {
+                    pq.add(neighbor);
+                }
+            }
+        }
+        return -1;
+    }
+
+    public static class CostNode{
+        int nodeBegin;
+        int nodeEnd;
+        int cost;
+
+        public CostNode(int nodeBegin,int nodeEnd, int cost){
+            this.nodeBegin = nodeBegin;
+            this.nodeEnd = nodeEnd;
+            this.cost = cost;
+        }
     }
 
 }
